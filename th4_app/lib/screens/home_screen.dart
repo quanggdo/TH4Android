@@ -176,8 +176,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() => _isLoading = true);
     try {
-      // fetch more items to increase chance of matches (Fake API has no search endpoint)
-      final List<Product> all = await _apiService.fetchProducts(limit: 100);
+      // FakeStore has no search endpoint, so fetch a broad list and filter locally.
+      final List<Product> all = (_selectedCategory == null ||
+              _selectedCategory!.isEmpty)
+          ? await _apiService.fetchProducts(limit: 100)
+          : await _apiService.fetchProductsByCategory(
+              _selectedCategory!,
+              limit: 100,
+            );
       final List<Product> filtered = all.where((Product p) {
         return p.title.toLowerCase().contains(q) ||
             p.description.toLowerCase().contains(q);
