@@ -17,24 +17,28 @@ không phụ thuộc Firebase.
 
 - lib/models/product.dart
 	- Entity sản phẩm từ FakeStore API.
-	- Field chính: id, title, price, description, category, image.
+	- Field chính: id, title, price, description, category, image, rating.
+	- rating là object riêng (ProductRating) gồm rate và count.
 	- fromJson/toJson cho network và local.
 
 - lib/models/cart_item.dart
 	- Một dòng trong giỏ hàng.
 	- Gồm full Product + quantity + isSelected + size + color.
-	- toDTO() để chuyển sang payload gọn cho checkout.
+	- toDTO() chuyển sang DTO có snapshot Product để lưu đơn hàng đầy đủ thông tin hiển thị.
 
 - lib/models/cart_item_dto.dart
-	- Payload gọn cho checkout/order request.
-	- Field: productId, quantity, size, color, price.
+	- DTO item dùng cho checkout/order request.
+	- Field: productId, product, quantity, size, color, unitPrice.
+	- Có fromJson/toJson và tương thích ngược dữ liệu cũ còn key price.
 
 - lib/models/order_request.dart
 	- Input để tạo đơn hàng.
 	- Gồm items (List<CartItemDTO>) + paymentMethod + shippingAddress + totalAmount + note.
+	- Có fromJson/toJson để parse và lưu trữ nhất quán.
 
 - lib/models/order.dart
 	- Bản ghi đơn hàng đã tạo.
+	- items được typed là List<CartItemDTO> (thay vì List<Map<String, dynamic>>).
 	- Bổ sung metadata: id, status, createdAt.
 	- fromRequest(), fromJson(), copyWith(status), toJson().
 
@@ -44,6 +48,7 @@ không phụ thuộc Firebase.
 	- Nguồn dữ liệu chính của giỏ hàng trong RAM.
 	- Đồng bộ local sau mỗi thay đổi.
 	- Expose các getter tính toán cho UI.
+	- buildSelectedOrderRequest() tính totalAmount từ unitPrice * quantity của selected DTO để khóa chặt tính nhất quán payload.
 
 ### Services
 
@@ -57,6 +62,12 @@ không phụ thuộc Firebase.
 
 - lib/services/order_service.dart
 	- placeOrder(OrderRequest) -> tạo Order và lưu local.
+	- Validate dữ liệu trước khi lưu:
+		- items không rỗng.
+		- productId khớp product.id.
+		- quantity >= 1.
+		- unitPrice >= 0.
+		- totalAmount phải khớp tổng các item (sai số cho phép 0.01).
 	- loadOrderModels(), loadOrdersByStatus(status), getOrderById(id).
 	- updateOrderStatus(id, status), cancelOrder(id), clearOrders().
 
@@ -89,6 +100,10 @@ không phụ thuộc Firebase.
 - buildSelectedOrderRequest(...) từ CartProvider.
 - OrderService.placeOrder(orderRequest) để lưu đơn local.
 - CartProvider.checkoutSelected() để xóa các item đã mua khỏi giỏ.
+
+Lưu ý dữ liệu:
+- Mỗi item trong order đã chứa snapshot Product đầy đủ.
+- UI Orders có thể hiển thị title/image/category/rating kể cả khi danh mục sản phẩm gốc thay đổi hoặc API tạm không trả dữ liệu.
 
 5. Orders
 - loadOrderModels()/loadOrdersByStatus(status) để hiển thị tab
@@ -172,6 +187,8 @@ Khuyến nghị UI map label:
 - [x] Core models/services/providers đã thống nhất.
 - [x] Giỏ hàng lưu local và khôi phục dữ liệu on startup.
 - [x] Đơn hàng local có lọc theo status và cập nhật status.
+- [x] Dữ liệu item order lưu đủ snapshot Product để hiển thị lại ổn định.
+- [x] Validate tính nhất quán tổng tiền và item trước khi tạo đơn.
 - [x] Unit tests đang pass.
 
 ## 8. Yêu cầu hiển thị TH4

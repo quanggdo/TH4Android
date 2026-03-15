@@ -19,10 +19,11 @@ class CartItem {
   CartItemDTO toDTO() {
     return CartItemDTO(
       productId: product.id,
+      product: product,
       quantity: quantity,
       size: size,
       color: color,
-      price: product.price,
+      unitPrice: product.price,
     );
   }
 

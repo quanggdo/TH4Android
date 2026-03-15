@@ -204,15 +204,21 @@ class CartProvider extends ChangeNotifier {
     required String shippingAddress,
     String? note,
   }) {
-    if (selectedItemsDTO.isEmpty) {
+    final List<CartItemDTO> selectedItems = selectedItemsDTO;
+    if (selectedItems.isEmpty) {
       throw StateError('Cannot build order request from empty selection');
     }
 
+    final double selectedTotal = selectedItems.fold<double>(
+      0,
+      (double sum, CartItemDTO item) => sum + (item.unitPrice * item.quantity),
+    );
+
     return OrderRequest(
-      items: selectedItemsDTO,
+      items: selectedItems,
       paymentMethod: paymentMethod,
       shippingAddress: shippingAddress,
-      totalAmount: totalAmount,
+      totalAmount: selectedTotal,
       note: note,
     );
   }

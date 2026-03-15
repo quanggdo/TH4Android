@@ -16,6 +16,7 @@ Product _sampleProduct() {
     description: 'Sample',
     category: 'fashion',
     image: 'https://example.com/image.png',
+    rating: ProductRating(rate: 4.2, count: 50),
   );
 }
 
@@ -27,6 +28,7 @@ Product _sampleProduct2() {
     description: 'Sample 2',
     category: 'fashion',
     image: 'https://example.com/image2.png',
+    rating: ProductRating(rate: 4.7, count: 80),
   );
 }
 

@@ -1,4 +1,5 @@
 import 'order_request.dart';
+import 'cart_item_dto.dart';
 
 class Order {
   Order({
@@ -13,7 +14,7 @@ class Order {
   });
 
   final String id;
-  final List<Map<String, dynamic>> items;
+  final List<CartItemDTO> items;
   final String paymentMethod;
   final String shippingAddress;
   final double totalAmount;
@@ -24,12 +25,18 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) {
     final List<dynamic> rawItems = (json['items'] as List<dynamic>?) ??
         <dynamic>[];
+
     return Order(
       id: json['id'] as String,
       items: rawItems
-          .map((dynamic e) => (e as Map<dynamic, dynamic>)
-              .map((dynamic key, dynamic value) =>
-                  MapEntry(key as String, value)))
+          .map(
+            (dynamic e) => CartItemDTO.fromJson(
+              (e as Map<dynamic, dynamic>).map(
+                (dynamic key, dynamic value) =>
+                    MapEntry(key as String, value),
+              ),
+            ),
+          )
           .toList(),
       paymentMethod: json['paymentMethod'] as String? ?? '',
       shippingAddress: json['shippingAddress'] as String? ?? '',
@@ -48,7 +55,7 @@ class Order {
   }) {
     return Order(
       id: id,
-      items: request.items.map((e) => e.toJson()).toList(),
+      items: request.items,
       paymentMethod: request.paymentMethod,
       shippingAddress: request.shippingAddress,
       totalAmount: request.totalAmount,
@@ -76,7 +83,7 @@ class Order {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'items': items,
+      'items': items.map((CartItemDTO item) => item.toJson()).toList(),
       'paymentMethod': paymentMethod,
       'shippingAddress': shippingAddress,
       'totalAmount': totalAmount,

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:th4_app/models/cart_item_dto.dart';
 import 'package:th4_app/models/order_request.dart';
+import 'package:th4_app/models/product.dart';
 import 'package:th4_app/services/order_service.dart';
 
 OrderRequest _sampleOrderRequest({String paymentMethod = 'COD'}) {
@@ -9,10 +10,19 @@ OrderRequest _sampleOrderRequest({String paymentMethod = 'COD'}) {
     items: <CartItemDTO>[
       CartItemDTO(
         productId: 1,
+        product: Product(
+          id: 1,
+          title: 'T-Shirt',
+          price: 120000,
+          description: 'Sample',
+          category: 'fashion',
+          image: 'https://example.com/image.png',
+          rating: ProductRating(rate: 4.2, count: 50),
+        ),
         quantity: 2,
         size: 'M',
         color: 'Red',
-        price: 120000,
+        unitPrice: 120000,
       ),
     ],
     paymentMethod: paymentMethod,

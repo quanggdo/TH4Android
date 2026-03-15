@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/cart_item_dto.dart';
 import '../models/order.dart';
 import '../models/order_request.dart';
 import '../utils/app_constants.dart';
@@ -16,6 +17,26 @@ class OrderService {
   }) async {
     if (orderRequest.items.isEmpty) {
       throw StateError('OrderRequest items cannot be empty');
+    }
+
+    for (final CartItemDTO item in orderRequest.items) {
+      if (item.productId != item.product.id) {
+        throw StateError('Order item productId does not match product.id');
+      }
+      if (item.quantity < 1) {
+        throw StateError('Order item quantity must be at least 1');
+      }
+      if (item.unitPrice < 0) {
+        throw StateError('Order item unitPrice cannot be negative');
+      }
+    }
+
+    final double computedTotal = orderRequest.items.fold<double>(
+      0,
+      (double sum, CartItemDTO item) => sum + (item.unitPrice * item.quantity),
+    );
+    if ((computedTotal - orderRequest.totalAmount).abs() > 0.01) {
+      throw StateError('OrderRequest totalAmount does not match item totals');
     }
 
     final String nowIso = DateTime.now().toIso8601String();
