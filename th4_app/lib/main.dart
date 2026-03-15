@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/cart_provider.dart';
 import 'services/storage_service.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,20 +28,7 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: const Color(0xFFF7F7F5),
           useMaterial3: true,
         ),
-        home: const CoreOnlyScreen(),
-      ),
-    );
-  }
-}
-
-class CoreOnlyScreen extends StatelessWidget {
-  const CoreOnlyScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Core layers only: models, services, providers, utils'),
+        home: const HomeScreen(),
       ),
     );
   }
