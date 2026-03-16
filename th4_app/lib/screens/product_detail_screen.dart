@@ -5,6 +5,10 @@ import 'package:intl/intl.dart';
 import '../models/product.dart';
 import '../models/product_variation.dart';
 import '../providers/cart_provider.dart';
+import '../models/cart_item_dto.dart';
+import 'cart_screen.dart';
+import 'checkout_screen.dart';
+import '../widgets/cart_badge.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({super.key, required this.product});
@@ -24,7 +28,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   ProductVariationSelection _selection = ProductVariationSelection();
 
-  void _openVariationSheet() {
+  void _openVariationSheet({void Function(ProductVariationSelection)? afterConfirm}) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -48,6 +52,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(const SnackBar(content: Text('Thêm thành công')));
+              if (afterConfirm != null) {
+                afterConfirm(sel);
+              }
             },
           ),
         );
@@ -73,13 +80,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       bottomNavigationBar: _buildBottomBar(),
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: 320,
+          SliverPersistentHeader(
             pinned: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            flexibleSpace: FlexibleSpaceBar(
-              title: const Text(''),
-              background: Stack(
+            delegate: _ToolbarDelegate(
+              topPadding: MediaQuery.of(context).padding.top,
+              onBack: () => Navigator.of(context).pop(),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 320,
+              child: Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
                   PageView.builder(
@@ -294,10 +306,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     icon: const Icon(Icons.chat_bubble_outline),
                     onPressed: () {},
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.shopping_cart_outlined),
-                    onPressed: () {},
-                  ),
+                  const CartBadge(),
                 ],
               ),
             ),
@@ -313,7 +322,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           backgroundColor: Colors.blue,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: _openVariationSheet,
+                        onPressed: () => _openVariationSheet(),
                         child: const Text('Thêm vào giỏ hàng'),
                       ),
                     ),
@@ -322,7 +331,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(6.0),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () => _openVariationSheet(afterConfirm: (sel) {
+                          final CartItemDTO dto = CartItemDTO(
+                            productId: widget.product.id,
+                            product: widget.product,
+                            quantity: sel.quantity,
+                            size: sel.size,
+                            color: sel.color,
+                            unitPrice: widget.product.price,
+                          );
+
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => CheckoutScreen(selectedItems: <CartItemDTO>[dto]),
+                            ),
+                          );
+                        }),
                         child: const Text('Mua ngay'),
                       ),
                     ),
@@ -441,4 +465,37 @@ class _VariationSheetState extends State<_VariationSheet> {
       ),
     );
   }
+}
+
+class _ToolbarDelegate extends SliverPersistentHeaderDelegate {
+  _ToolbarDelegate({required this.topPadding, required this.onBack});
+
+  final double topPadding;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SafeArea(
+      bottom: false,
+      child: Container(
+        height: kToolbarHeight,
+        color: Colors.white,
+        alignment: Alignment.centerLeft,
+        child: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.black,
+          onPressed: onBack,
+        ),
+      ),
+    );
+  }
+
+  @override
+  double get maxExtent => topPadding + kToolbarHeight;
+
+  @override
+  double get minExtent => topPadding + kToolbarHeight;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
 }
