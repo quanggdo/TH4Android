@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
   String _query = '';
-  List<Product> _displayedProducts = <Product>[];
+  final List<Product> _displayedProducts = <Product>[];
   String? _selectedCategory;
 
   int _page = 1;
