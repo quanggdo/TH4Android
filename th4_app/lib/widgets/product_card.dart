@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../screens/product_detail_screen.dart';
 
 import '../models/product.dart';
 
@@ -37,22 +38,32 @@ class ProductCard extends StatelessWidget {
             child: Stack(
               children: <Widget>[
                 Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      product.image,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return Container(
-                          color: Colors.grey.shade200,
-                          child: const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stack) =>
-                          Container(color: Colors.grey.shade200),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => ProductDetailScreen(product: product),
+                      ));
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Hero(
+                        tag: 'product-${product.id}',
+                        child: Image.network(
+                          product.image,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                              color: Colors.grey.shade200,
+                              child: const Center(
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stack) =>
+                              Container(color: Colors.grey.shade200),
+                        ),
+                      ),
                     ),
                   ),
                 ),
