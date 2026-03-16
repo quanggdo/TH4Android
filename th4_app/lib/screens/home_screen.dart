@@ -11,6 +11,7 @@ import '../widgets/banner_carousel.dart';
 import '../widgets/category_scroller.dart';
 import '../widgets/product_card.dart';
 import '../widgets/cart_badge.dart';
+import 'order_history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -249,6 +250,17 @@ class _HomeScreenState extends State<HomeScreen> {
               centerTitle: false,
               title: const Text('TH4 - Nhóm 2'),
               actions: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  tooltip: 'Đơn mua',
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const OrderHistoryScreen(),
+                      ),
+                    );
+                  },
+                ),
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: CartBadge(),
