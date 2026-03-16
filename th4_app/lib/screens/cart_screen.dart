@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../providers/cart_provider.dart';
 import '../models/cart_item.dart';
+import '../models/cart_item_dto.dart';
+import 'checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -13,11 +15,21 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  Future<void> _onCheckoutPressed() async {
+  void _onCheckoutPressed() {
     final CartProvider cart = Provider.of<CartProvider>(context, listen: false);
-    await cart.checkoutSelected();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thanh toán thành công (giả bố)')));
+    final List<CartItemDTO> selectedItems = cart.selectedItemsDTO;
+    if (selectedItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng chọn sản phẩm để thanh toán')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CheckoutScreen(selectedItems: selectedItems),
+      ),
+    );
   }
 
   @override
