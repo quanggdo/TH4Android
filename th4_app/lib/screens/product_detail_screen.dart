@@ -38,15 +38,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             onConfirm: (ProductVariationSelection sel) {
               setState(() => _selection = sel);
               Navigator.of(ctx).pop();
-              final CartProvider cart =
-                  Provider.of<CartProvider>(context, listen: false);
-              for (int i = 0; i < sel.quantity; i++) {
-                cart.addItem(widget.product,
-                    size: sel.size, color: sel.color);
-              }
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Thêm thành công')),
+              final CartProvider cart = Provider.of<CartProvider>(
+                context,
+                listen: false,
               );
+              for (int i = 0; i < sel.quantity; i++) {
+                cart.addItem(widget.product, size: sel.size, color: sel.color);
+              }
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Thêm thành công')));
             },
           ),
         );
@@ -62,26 +63,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final NumberFormat priceFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+    final NumberFormat priceFormat = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: 'đ',
+    );
     final double originalPrice = (widget.product.price * 1.2).roundToDouble();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chi tiết sản phẩm'),
-      ),
       bottomNavigationBar: _buildBottomBar(),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 320,
-              child: Stack(
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            expandedHeight: 320,
+            pinned: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            flexibleSpace: FlexibleSpaceBar(
+              title: const Text(''),
+              background: Stack(
+                fit: StackFit.expand,
                 children: <Widget>[
                   PageView.builder(
                     controller: _pageController,
                     itemCount: 3,
                     itemBuilder: (BuildContext ctx, int index) {
-                      // Use same image 3 times to simulate multiple angles
                       return Hero(
                         tag: 'product-${widget.product.id}',
                         child: Image.network(
@@ -93,7 +97,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             return Container(
                               color: Colors.grey.shade200,
                               child: const Center(
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                             );
                           },
@@ -119,7 +125,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               final double diff = (i - page).abs();
                               final double size = (8 - (diff * 4)).clamp(4, 8);
                               return Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
                                 width: size,
                                 height: size,
                                 decoration: BoxDecoration(
@@ -136,93 +144,137 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ],
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    widget.product.title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
                     children: <Widget>[
                       Text(
-                        widget.product.title,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: <Widget>[
-                          Text(
-                            priceFormat.format(widget.product.price),
-                            style: const TextStyle(
-                                color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            priceFormat.format(originalPrice),
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      GestureDetector(
-                        onTap: _openVariationSheet,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  const Text('Phân loại', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 4),
-                                  Text('Kích cỡ: ${_selection.size}, Màu: ${_selection.color}'),
-                                ],
-                              ),
-                              const Icon(Icons.chevron_right),
-                            ],
-                          ),
+                        priceFormat.format(widget.product.price),
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      const Text('Mô tả', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 6),
-                      LayoutBuilder(builder: (context, constraints) {
-                        // description display (animated collapse handled below)
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            AnimatedCrossFade(
-                              firstChild: Text(
-                                widget.product.description,
-                                maxLines: 5,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              secondChild: Text(widget.product.description),
-                              crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                              duration: const Duration(milliseconds: 200),
-                            ),
-                            TextButton(
-                              onPressed: () => setState(() => _expanded = !_expanded),
-                              child: Text(_expanded ? 'Thu gọn' : 'Xem thêm'),
-                            ),
-                          ],
-                        );
-                      }),
-                      const SizedBox(height: 24),
+                      const SizedBox(width: 12),
+                      Text(
+                        priceFormat.format(originalPrice),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: _openVariationSheet,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              const Text(
+                                'Phân loại',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Kích cỡ: ${_selection.size}, Màu: ${_selection.color}',
+                              ),
+                            ],
+                          ),
+                          const Icon(Icons.chevron_right),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Mô tả',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final TextSpan span = TextSpan(
+                        text: widget.product.description,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          height: 1.4,
+                        ),
+                      );
+                      final TextPainter tp = TextPainter(
+                        text: span,
+                        maxLines: 5,
+                        textDirection: Directionality.of(context),
+                      );
+                      tp.layout(maxWidth: constraints.maxWidth);
+                      final bool showButton = tp.didExceedMaxLines;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          AnimatedCrossFade(
+                            firstChild: Text(
+                              widget.product.description,
+                              maxLines: 5,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                height: 1.4,
+                              ),
+                            ),
+                            secondChild: Text(
+                              widget.product.description,
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                height: 1.4,
+                              ),
+                            ),
+                            crossFadeState: _expanded
+                                ? CrossFadeState.showSecond
+                                : CrossFadeState.showFirst,
+                            duration: const Duration(milliseconds: 200),
+                          ),
+                          if (showButton)
+                            TextButton(
+                              onPressed: () =>
+                                  setState(() => _expanded = !_expanded),
+                              child: Text(_expanded ? 'Thu gọn' : 'Xem thêm'),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -257,7 +309,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(6.0),
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                        ),
                         onPressed: _openVariationSheet,
                         child: const Text('Thêm vào giỏ hàng'),
                       ),
@@ -322,7 +377,10 @@ class _VariationSheetState extends State<_VariationSheet> {
         children: <Widget>[
           const Center(child: SizedBox(height: 6, width: 48, child: Divider())),
           const SizedBox(height: 8),
-          const Text('Chọn Kích cỡ', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text(
+            'Chọn Kích cỡ',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           Wrap(
             spacing: 8,
             children: widget.sizes.map((String s) {
@@ -335,7 +393,10 @@ class _VariationSheetState extends State<_VariationSheet> {
             }).toList(),
           ),
           const SizedBox(height: 12),
-          const Text('Chọn Màu sắc', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text(
+            'Chọn Màu sắc',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           Wrap(
             spacing: 8,
             children: widget.colors.map((String c) {
@@ -352,7 +413,9 @@ class _VariationSheetState extends State<_VariationSheet> {
           Row(
             children: <Widget>[
               IconButton(
-                onPressed: () => setState(() => _quantity = (_quantity > 1 ? _quantity - 1 : 1)),
+                onPressed: () => setState(
+                  () => _quantity = (_quantity > 1 ? _quantity - 1 : 1),
+                ),
                 icon: const Icon(Icons.remove_circle_outline),
               ),
               Text('$_quantity', style: const TextStyle(fontSize: 16)),
@@ -362,7 +425,13 @@ class _VariationSheetState extends State<_VariationSheet> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: () => widget.onConfirm(ProductVariationSelection(size: _size, color: _color, quantity: _quantity)),
+                onPressed: () => widget.onConfirm(
+                  ProductVariationSelection(
+                    size: _size,
+                    color: _color,
+                    quantity: _quantity,
+                  ),
+                ),
                 child: const Text('Xác nhận'),
               ),
             ],
