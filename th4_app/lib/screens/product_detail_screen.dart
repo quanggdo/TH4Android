@@ -194,10 +194,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const Text('Mô tả', style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 6),
                       LayoutBuilder(builder: (context, constraints) {
-                        final TextSpan span = TextSpan(
-                          text: widget.product.description,
-                          style: const TextStyle(color: Colors.black87, height: 1.4),
-                        );
+                        // description display (animated collapse handled below)
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
